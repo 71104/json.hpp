@@ -56,10 +56,6 @@ namespace JSON {
 		static char constexpr s_szName[] = { _szName... };
 		_Value m_Value;
 
-		static Object<Field<_Value, _szName...>> Load(istream &ris) {
-			// TODO
-		}
-
 		Object(_Value const &a_rValue)
 			:
 		m_Value(a_rValue) {}
@@ -91,10 +87,6 @@ namespace JSON {
 	{
 		static char constexpr s_szName[] = { _szName... };
 		_Value m_Value;
-
-		static Object<Field<_Value, _szName...>, _OtherFields...> Load(istream &ris) {
-			// TODO
-		}
 
 		virtual _Value &operator [] (string const &rstrName) {
 			if (rstrName != s_szName) {
