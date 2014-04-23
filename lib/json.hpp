@@ -56,6 +56,8 @@ namespace JSON {
 		static char constexpr s_szName[] = { _szName... };
 		_Value m_Value;
 
+		Object() {}
+
 		Object(_Value const &a_rValue)
 			:
 		m_Value(a_rValue) {}
@@ -63,6 +65,8 @@ namespace JSON {
 		Object(_Value &&a_rrValue)
 			:
 		m_Value(move(a_rrValue)) {}
+
+		virtual ~Object() {}
 
 		virtual _Value &operator [] (string const &rstrName) {
 			if (rstrName != s_szName) {
@@ -87,6 +91,8 @@ namespace JSON {
 	{
 		static char constexpr s_szName[] = { _szName... };
 		_Value m_Value;
+
+		virtual ~Object() {}
 
 		virtual _Value &operator [] (string const &rstrName) {
 			if (rstrName != s_szName) {
