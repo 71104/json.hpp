@@ -4,6 +4,9 @@
 using namespace std;
 
 int main() {
-	JSON::Load<nullptr_t>(cin);
+	cout << JSON::Object<
+		JSON::Field<bool, 'f'>,
+		JSON::Field<double, 'x'>
+	>().Get<'x'>() << endl;
 	return 0;
 }

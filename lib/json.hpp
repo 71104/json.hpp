@@ -51,9 +51,23 @@ namespace JSON {
 	template<typename ..._Fields>
 	struct Object {};
 
+	template<typename _Object, char const ..._szName>
+	struct Getter {};
+
+	template<typename _Value, char const ..._szName, typename ..._OtherFields>
+	struct Getter<Object<Field<_Value, _szName...>, _OtherFields...>, _szName...> {
+		static _Value &Get(Object<Field<_Value, _szName...>, _OtherFields...> &rObject) {
+			return rObject.m_Value;
+		}
+
+		static _Value const &Get(Object<Field<_Value, _szName...>, _OtherFields...> const &rObject) {
+			return rObject.m_Value;
+		}
+	};
+
 	template<typename _Value, char const ..._szName>
 	struct Object<Field<_Value, _szName...>> {
-		static char constexpr s_szName[] = { _szName... };
+		static char const s_szName[];
 		_Value m_Value;
 
 		Object() {}
@@ -68,48 +82,32 @@ namespace JSON {
 
 		virtual ~Object() {}
 
-		virtual _Value &operator [] (string const &rstrName) {
-			if (rstrName != s_szName) {
-				throw AccessError();
-			} else {
-				return m_Value;
-			}
+		template<char const ..._szFieldName>
+		_Value &Get() {
+			return Getter<Object<Field<_Value, _szFieldName...>>, _szFieldName...>::Get(*this);
 		}
 
-		virtual _Value const &operator [] (string const &rstrName) const {
-			if (rstrName != s_szName) {
-				throw AccessError();
-			} else {
-				return m_Value;
-			}
+		template<char const ..._szFieldName>
+		_Value const &Get() const {
+			return Getter<Object<Field<_Value, _szFieldName...>>, _szFieldName...>::Get(*this);
 		}
 	};
+
+	template<typename _Value, char const ..._szName>
+	char const Object<Field<_Value, _szName...>>::s_szName[] = { _szName... };
 
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
 	struct Object<Field<_Value, _szName...>, _OtherFields...> :
 		public Object<_OtherFields...>
 	{
-		static char constexpr s_szName[] = { _szName... };
+		static char const s_szName[];
 		_Value m_Value;
 
 		virtual ~Object() {}
-
-		virtual _Value &operator [] (string const &rstrName) {
-			if (rstrName != s_szName) {
-				return Object<_OtherFields...>::operator [] (rstrName);
-			} else {
-				return m_Value;
-			}
-		}
-
-		virtual _Value const &operator [] (string const &rstrName) const {
-			if (rstrName != s_szName) {
-				return Object<_OtherFields...>::operator [] (rstrName);
-			} else {
-				return m_Value;
-			}
-		}
 	};
+
+	template<typename _Value, char const ..._szName, typename ..._OtherFields>
+	char const Object<Field<_Value, _szName...>, _OtherFields...>::s_szName[] = { _szName... };
 
 	template<typename _Type>
 	struct Loader {
@@ -162,7 +160,36 @@ namespace JSON {
 	template<>
 	struct Loader<string> {
 		static string Load(istream &ris) {
-			// TODO
+			Skip(SkipSeparators(ris), "\"");
+			string str;
+			int ch;
+			while ((ch = ris.get()) != '\"') {
+				if (ch < 0) {
+					throw SyntaxError();
+				} else if (ch == '\\') {
+					if ((ch = ris.get()) < 0) {
+						throw SyntaxError();
+					} else {
+						switch (ch) {
+						case 'n':
+							str += '\n';
+							break;
+						case 'r':
+							str += '\r';
+							break;
+						case 't':
+							str += '\t';
+							break;
+						default:
+							str += ch;
+							break;
+						}
+					}
+				} else {
+					str += ch;
+				}
+			}
+			return str;
 		}
 	};
 
@@ -170,13 +197,25 @@ namespace JSON {
 	struct Loader<Object<_Fields...>> {
 		static Object<_Fields...> Load(istream &ris) {
 			// TODO
+			throw false;
 		}
 	};
 
 	template<typename _Element>
 	struct Loader<vector<_Element>> {
 		static vector<_Element> Load(istream &ris) {
-			// TODO
+			SkipSeparators(Skip(SkipSeparators(ris), "["));
+			if (ris.peek() != ']') {
+				vector<_Element> v = { Loader<_Element>::Load(ris) };
+				while (SkipSeparators(ris).peek() != ']') {
+					v.push_back(Loader<_Element>::Load(ris));
+				}
+				ris.get();
+				return v;
+			} else {
+				ris.get();
+				return vector<_Element>();
+			}
 		}
 	};
 
