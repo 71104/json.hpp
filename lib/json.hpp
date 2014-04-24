@@ -45,6 +45,17 @@ namespace JSON {
 	template<typename _Field, typename ..._Fields>
 	struct Getter {};
 
+	template<typename _Value, char const ..._szName, typename ..._Fields>
+	struct Getter<Field<_Value, _szName...>, _Fields...> {
+		static _Value &Get(Object<_Fields...> &rObject) {
+			return Getter<Field<_Value, _szName...>, _Fields...>::Get(rObject);
+		}
+
+		static _Value const &Get(Object<_Fields...> const &rObject) {
+			return Getter<Field<_Value, _szName...>, _Fields...>::Get(rObject);
+		}
+	};
+
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
 	struct Getter<Field<_Value, _szName...>, Field<_Value, _szName...>, _OtherFields...> {
 		static _Value &Get(Object<Field<_Value, _szName...>, _OtherFields...> &rObject) {

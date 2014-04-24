@@ -8,11 +8,16 @@ int main() {
 		JSON::Field<int, 'a'>,
 		JSON::Field<double, 'b'>,
 		JSON::Field<string, 'c'>,
+		JSON::Field<JSON::Object<
+			JSON::Field<bool, 'f'>
+		>, 'o'>,
 		JSON::Field<vector<vector<JSON::Object<
 			JSON::Field<double, 'x'>,
 			JSON::Field<double, 'y'>
 		>>>, 'x'>
-	>().Get<'a'>();
+	> o;
+
+	o.Get<'a'>();
 
 	JSON::Object<JSON::Field<bool, 'f'>>().Get<'f'>();
 
