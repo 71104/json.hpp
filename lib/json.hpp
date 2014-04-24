@@ -15,16 +15,38 @@ namespace JSON {
 	struct AccessError : public Error {};
 
 	template<typename _Value, char const ..._szName>
-	struct Field {};
+	struct Field {
+		static char const s_szName;
+		typedef _Value Type;
+	};
+
+	template<char const ..._sz>
+	struct FieldName {};
+
+	template<typename _Name, typename ..._Fields>
+	struct GetFieldType {};
+
+	template<typename _Value, char const ..._szName, typename ..._OtherFields>
+	struct GetFieldType<FieldName<_szName...>, Field<_Value, _szName...>, _OtherFields...> {
+		typedef _Value Type;
+	};
+
+	template<char const ..._szFieldName, typename _Value, char const ..._szName, typename ..._OtherFields>
+	struct GetFieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...> {
+		typedef GetFieldType<FieldName<_szFieldName...>, _OtherFields...> Type;
+	};
+
+	template<typename _Value, char const ..._szName>
+	char const Field<_Value, _szName...>::s_szName = { _szName... };
 
 	template<typename ..._Fields>
 	struct Object {};
 
-	template<typename _Object, char const ..._szName>
+	template<typename _Field, typename ..._Fields>
 	struct Getter {};
 
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
-	struct Getter<Object<Field<_Value, _szName...>, _OtherFields...>, _szName...> {
+	struct Getter<Field<_Value, _szName...>, Field<_Value, _szName...>, _OtherFields...> {
 		static _Value &Get(Object<Field<_Value, _szName...>, _OtherFields...> &rObject) {
 			return rObject.m_Value;
 		}
@@ -34,36 +56,11 @@ namespace JSON {
 		}
 	};
 
-	template<typename _Value, char const ..._szName>
-	struct Object<Field<_Value, _szName...>> {
-		static char const s_szName[];
-		_Value m_Value;
-
+	template<>
+	struct Object<> {
 		Object() {}
-
-		Object(_Value const &a_rValue)
-			:
-		m_Value(a_rValue) {}
-
-		Object(_Value &&a_rrValue)
-			:
-		m_Value(move(a_rrValue)) {}
-
 		virtual ~Object() {}
-
-		template<char const ..._szFieldName>
-		_Value &Get() {
-			return Getter<Object<Field<_Value, _szFieldName...>>, _szFieldName...>::Get(*this);
-		}
-
-		template<char const ..._szFieldName>
-		_Value const &Get() const {
-			return Getter<Object<Field<_Value, _szFieldName...>>, _szFieldName...>::Get(*this);
-		}
 	};
-
-	template<typename _Value, char const ..._szName>
-	char const Object<Field<_Value, _szName...>>::s_szName[] = { _szName... };
 
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
 	struct Object<Field<_Value, _szName...>, _OtherFields...> :
@@ -75,6 +72,16 @@ namespace JSON {
 		Object() {}
 
 		virtual ~Object() {}
+
+		template<char const ..._szFieldName>
+		typename GetFieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type &Get() {
+			return Getter<Field<_Value, _szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Get(*this);
+		}
+
+		template<char const ..._szFieldName>
+		typename GetFieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type const &Get() const {
+			return Getter<Field<_Value, _szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Get(*this);
+		}
 	};
 
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
@@ -89,6 +96,7 @@ namespace JSON {
 	struct Loader<nullptr_t> {
 		static nullptr_t Load(istream &ris) {
 			// TODO
+			throw Error();
 		}
 	};
 
@@ -96,6 +104,7 @@ namespace JSON {
 	struct Loader<bool> {
 		static bool Load(istream &ris) {
 			// TODO
+			throw Error();
 		}
 	};
 
@@ -103,6 +112,7 @@ namespace JSON {
 	struct Loader<int> {
 		static int Load(istream &ris) {
 			// TODO
+			throw Error();
 		}
 	};
 
@@ -110,6 +120,7 @@ namespace JSON {
 	struct Loader<unsigned int> {
 		static unsigned int Load(istream &ris) {
 			// TODO
+			throw Error();
 		}
 	};
 
@@ -117,6 +128,7 @@ namespace JSON {
 	struct Loader<double> {
 		static double Load(istream &ris) {
 			// TODO
+			throw Error();
 		}
 	};
 
@@ -124,6 +136,7 @@ namespace JSON {
 	struct Loader<string> {
 		static string Load(istream &ris) {
 			// TODO
+			throw Error();
 		}
 	};
 
@@ -131,6 +144,7 @@ namespace JSON {
 	struct Loader<Object<_Fields...>> {
 		static Object<_Fields...> Load(istream &ris) {
 			// TODO
+			throw Error();
 		}
 	};
 
@@ -138,6 +152,7 @@ namespace JSON {
 	struct Loader<vector<_Element>> {
 		static vector<_Element> Load(istream &ris) {
 			// TODO
+			throw Error();
 		}
 	};
 
