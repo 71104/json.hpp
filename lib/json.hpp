@@ -31,9 +31,9 @@ namespace JSON {
 		typedef _Value Type;
 	};
 
-	template<char const ..._szFieldName, typename _Value, char const ..._szName, typename ..._OtherFields>
-	struct GetFieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...> {
-		typedef GetFieldType<FieldName<_szFieldName...>, _OtherFields...> Type;
+	template<char const ..._szFieldName, typename _FirstField, typename ..._OtherFields>
+	struct GetFieldType<FieldName<_szFieldName...>, _FirstField, _OtherFields...> {
+		typedef typename GetFieldType<FieldName<_szFieldName...>, _OtherFields...>::Type Type;
 	};
 
 	template<typename _Value, char const ..._szName>
@@ -45,17 +45,6 @@ namespace JSON {
 	template<typename _Field, typename ..._Fields>
 	struct Getter {};
 
-	template<typename _Value, char const ..._szName, typename ..._Fields>
-	struct Getter<Field<_Value, _szName...>, _Fields...> {
-		static _Value &Get(Object<_Fields...> &rObject) {
-			return Getter<Field<_Value, _szName...>, _Fields...>::Get(rObject);
-		}
-
-		static _Value const &Get(Object<_Fields...> const &rObject) {
-			return Getter<Field<_Value, _szName...>, _Fields...>::Get(rObject);
-		}
-	};
-
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
 	struct Getter<Field<_Value, _szName...>, Field<_Value, _szName...>, _OtherFields...> {
 		static _Value &Get(Object<Field<_Value, _szName...>, _OtherFields...> &rObject) {
@@ -64,6 +53,17 @@ namespace JSON {
 
 		static _Value const &Get(Object<Field<_Value, _szName...>, _OtherFields...> const &rObject) {
 			return rObject.m_Value;
+		}
+	};
+
+	template<typename _Value, char const ..._szName, typename _FirstField, typename ..._OtherFields>
+	struct Getter<Field<_Value, _szName...>, _FirstField, _OtherFields...> {
+		static _Value &Get(Object<_FirstField, _OtherFields...> &rObject) {
+			return Getter<Field<_Value, _szName...>, _OtherFields...>::Get(rObject);
+		}
+
+		static _Value const &Get(Object<_FirstField, _OtherFields...> const &rObject) {
+			return Getter<Field<_Value, _szName...>, _FirstField, _OtherFields...>::Get(rObject);
 		}
 	};
 
@@ -172,5 +172,7 @@ namespace JSON {
 		return Loader<_Type>::Load(ris);
 	}
 }
+
+#define UNPACK(sz) (sz)[0], ((sz)[0] > 0) ? UNPACK((sz) + 1) : 0
 
 #endif
