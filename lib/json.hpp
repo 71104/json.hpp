@@ -115,60 +115,89 @@ namespace JSON {
 	char const Object<Field<_Value, _szName...>, _OtherFields...>::s_szName[] = { _szName... };
 
 	template<typename _Type>
-	struct Loader {
+	struct Serializer {
 		static _Type Load(istream &ris);
+		static ostream &Store(ostream &ros, _Type const &r);
 	};
 
 	template<>
-	struct Loader<nullptr_t> {
+	struct Serializer<nullptr_t> {
 		static nullptr_t Load(istream &ris) {
 			// TODO
 			throw Error();
 		}
+
+		static ostream &Store(ostream &ros, nullptr_t const &r) {
+			return ros << "null";
+		}
 	};
 
 	template<>
-	struct Loader<bool> {
+	struct Serializer<bool> {
 		static bool Load(istream &ris) {
 			// TODO
 			throw Error();
 		}
+
+		static ostream &Store(ostream &ros, bool const &r) {
+			if (r) {
+				return ros << "true";
+			} else {
+				return ros << "false";
+			}
+		}
 	};
 
 	template<>
-	struct Loader<int> {
+	struct Serializer<int> {
 		static int Load(istream &ris) {
 			// TODO
 			throw Error();
 		}
+
+		static ostream &Store(ostream &ros, int const &r) {
+			return ros << r;
+		}
 	};
 
 	template<>
-	struct Loader<unsigned int> {
+	struct Serializer<unsigned int> {
 		static unsigned int Load(istream &ris) {
 			// TODO
 			throw Error();
 		}
+
+		static ostream &Store(ostream &ros, unsigned int const &r) {
+			return ros << r;
+		}
 	};
 
 	template<>
-	struct Loader<double> {
+	struct Serializer<double> {
 		static double Load(istream &ris) {
 			// TODO
 			throw Error();
 		}
+
+		static ostream &Store(ostream &ros, double const &r) {
+			return ros << r;
+		}
 	};
 
 	template<>
-	struct Loader<string> {
+	struct Serializer<string> {
 		static string Load(istream &ris) {
 			// TODO
 			throw Error();
 		}
+
+		static ostream &Store(ostream &ros, string const &r) {
+			return ros << '\"' << r << '\"'; // FIXME escape special characters
+		}
 	};
 
 	template<typename ..._Fields>
-	struct Loader<Object<_Fields...>> {
+	struct Serializer<Object<_Fields...>> {
 		static Object<_Fields...> Load(istream &ris) {
 			// TODO
 			throw Error();
@@ -176,7 +205,7 @@ namespace JSON {
 	};
 
 	template<typename _Element>
-	struct Loader<vector<_Element>> {
+	struct Serializer<vector<_Element>> {
 		static vector<_Element> Load(istream &ris) {
 			// TODO
 			throw Error();
@@ -185,7 +214,12 @@ namespace JSON {
 
 	template<typename _Type>
 	_Type Load(istream &ris) {
-		return Loader<_Type>::Load(ris);
+		return Serializer<_Type>::Load(ris);
+	}
+
+	template<typename _Type>
+	ostream &Store(ostream &ros, _Type const &r) {
+		return Serializer<_Type>::Store(ros, r);
 	}
 }
 
