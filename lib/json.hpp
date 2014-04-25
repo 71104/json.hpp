@@ -4,6 +4,7 @@
 #include <cctype>
 #include <string>
 #include <vector>
+#include <array>
 #include <regex>
 
 namespace JSON {
@@ -207,6 +208,14 @@ namespace JSON {
 	template<typename _Element>
 	struct Serializer<vector<_Element>> {
 		static vector<_Element> Load(istream &ris) {
+			// TODO
+			throw Error();
+		}
+	};
+
+	template<typename _Element, unsigned int _c>
+	struct Serializer<array<_Element, _c>> {
+		static array<_Element, _c> Load(istream &ris) {
 			// TODO
 			throw Error();
 		}
