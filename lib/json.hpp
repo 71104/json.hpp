@@ -86,12 +86,28 @@ namespace JSON {
 
 		template<char const ..._szFieldName>
 		typename FieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type &Get() {
-			return Getter<Field<_Value, _szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Get(*this);
+			return Getter<
+				Field<typename FieldType<
+					FieldName<_szFieldName...>,
+					Field<_Value, _szName...>,
+					_OtherFields...
+				>::Type, _szFieldName...>,
+				Field<_Value, _szName...>,
+				_OtherFields...
+			>::Get(*this);
 		}
 
 		template<char const ..._szFieldName>
 		typename FieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type const &Get() const {
-			return Getter<Field<_Value, _szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Get(*this);
+			return Getter<
+				Field<typename FieldType<
+					FieldName<_szFieldName...>,
+					Field<_Value, _szName...>,
+					_OtherFields...
+				>::Type, _szFieldName...>,
+				Field<_Value, _szName...>,
+				_OtherFields...
+			>::Get(*this);
 		}
 	};
 
