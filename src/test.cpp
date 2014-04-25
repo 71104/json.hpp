@@ -19,6 +19,7 @@ int main() {
 
 	o.Get<'a'>();
 	o.Get<'x'>();
+	o.Get<'o'>().Get<'f'>();
 
 	JSON::Object<JSON::Field<bool, 'f'>>().Get<'f'>();
 
