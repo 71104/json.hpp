@@ -24,16 +24,16 @@ namespace JSON {
 	struct FieldName {};
 
 	template<typename _Name, typename ..._Fields>
-	struct GetFieldType {};
+	struct FieldType {};
 
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
-	struct GetFieldType<FieldName<_szName...>, Field<_Value, _szName...>, _OtherFields...> {
+	struct FieldType<FieldName<_szName...>, Field<_Value, _szName...>, _OtherFields...> {
 		typedef _Value Type;
 	};
 
 	template<char const ..._szFieldName, typename _FirstField, typename ..._OtherFields>
-	struct GetFieldType<FieldName<_szFieldName...>, _FirstField, _OtherFields...> {
-		typedef typename GetFieldType<FieldName<_szFieldName...>, _OtherFields...>::Type Type;
+	struct FieldType<FieldName<_szFieldName...>, _FirstField, _OtherFields...> {
+		typedef typename FieldType<FieldName<_szFieldName...>, _OtherFields...>::Type Type;
 	};
 
 	template<typename _Value, char const ..._szName>
@@ -85,12 +85,12 @@ namespace JSON {
 		virtual ~Object() {}
 
 		template<char const ..._szFieldName>
-		typename GetFieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type &Get() {
+		typename FieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type &Get() {
 			return Getter<Field<_Value, _szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Get(*this);
 		}
 
 		template<char const ..._szFieldName>
-		typename GetFieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type const &Get() const {
+		typename FieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type const &Get() const {
 			return Getter<Field<_Value, _szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Get(*this);
 		}
 	};
