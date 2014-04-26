@@ -48,22 +48,22 @@ namespace JSON {
 
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
 	struct Getter<Field<_Value, _szName...>, Field<_Value, _szName...>, _OtherFields...> {
-		static _Value &Get(Object<Field<_Value, _szName...>, _OtherFields...> &rObject) {
+		inline static _Value &Get(Object<Field<_Value, _szName...>, _OtherFields...> &rObject) {
 			return rObject.m_Value;
 		}
 
-		static _Value const &Get(Object<Field<_Value, _szName...>, _OtherFields...> const &rObject) {
+		inline static _Value const &Get(Object<Field<_Value, _szName...>, _OtherFields...> const &rObject) {
 			return rObject.m_Value;
 		}
 	};
 
 	template<typename _Value, char const ..._szName, typename _FirstField, typename ..._OtherFields>
 	struct Getter<Field<_Value, _szName...>, _FirstField, _OtherFields...> {
-		static _Value &Get(Object<_FirstField, _OtherFields...> &rObject) {
+		inline static _Value &Get(Object<_FirstField, _OtherFields...> &rObject) {
 			return Getter<Field<_Value, _szName...>, _OtherFields...>::Get(rObject);
 		}
 
-		static _Value const &Get(Object<_FirstField, _OtherFields...> const &rObject) {
+		inline static _Value const &Get(Object<_FirstField, _OtherFields...> const &rObject) {
 			return Getter<Field<_Value, _szName...>, _FirstField, _OtherFields...>::Get(rObject);
 		}
 	};
@@ -86,7 +86,7 @@ namespace JSON {
 		virtual ~Object() {}
 
 		template<char const ..._szFieldName>
-		typename FieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type &Get() {
+		inline typename FieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type &Get() {
 			return Getter<
 				Field<typename FieldType<
 					FieldName<_szFieldName...>,
@@ -99,7 +99,7 @@ namespace JSON {
 		}
 
 		template<char const ..._szFieldName>
-		typename FieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type const &Get() const {
+		inline typename FieldType<FieldName<_szFieldName...>, Field<_Value, _szName...>, _OtherFields...>::Type const &Get() const {
 			return Getter<
 				Field<typename FieldType<
 					FieldName<_szFieldName...>,
@@ -222,12 +222,12 @@ namespace JSON {
 	};
 
 	template<typename _Type>
-	_Type Load(istream &ris) {
+	inline _Type Load(istream &ris) {
 		return Serializer<_Type>::Load(ris);
 	}
 
 	template<typename _Type>
-	ostream &Store(ostream &ros, _Type const &r) {
+	inline ostream &Store(ostream &ros, _Type const &r) {
 		return Serializer<_Type>::Store(ros, r);
 	}
 }
