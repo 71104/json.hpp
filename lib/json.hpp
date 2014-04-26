@@ -2,6 +2,7 @@
 #define __JSON_HPP__
 
 #include <cctype>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <array>
@@ -230,6 +231,17 @@ namespace JSON {
 	inline ostream &Store(ostream &ros, _Type const &r) {
 		return Serializer<_Type>::Store(ros, r);
 	}
+}
+
+template<typename ..._Fields>
+inline std::istream &operator >> (std::istream &ris, JSON::Object<_Fields...> &rObject) {
+	rObject = JSON::Load<JSON::Object<_Fields...>>(ris);
+	return ris;
+}
+
+template<typename ..._Fields>
+inline std::ostream &operator << (std::ostream &ros, JSON::Object<_Fields...> &rObject) {
+	return JSON::Store<JSON::Object<_Fields...>>(ros, rObject);
 }
 
 #define UNPACK(sz) (sz)[0], ((sz)[0] > 0) ? UNPACK((sz) + 1) : 0
