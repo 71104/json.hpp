@@ -22,6 +22,9 @@ namespace JSON {
 		typedef _Value Type;
 	};
 
+	template<typename _Value, char const ..._szName>
+	char const Field<_Value, _szName...>::s_szName = { _szName... };
+
 	template<char const ..._sz>
 	struct FieldName {};
 
@@ -37,9 +40,6 @@ namespace JSON {
 	struct FieldType<FieldName<_szFieldName...>, _FirstField, _OtherFields...> {
 		typedef typename FieldType<FieldName<_szFieldName...>, _OtherFields...>::Type Type;
 	};
-
-	template<typename _Value, char const ..._szName>
-	char const Field<_Value, _szName...>::s_szName = { _szName... };
 
 	template<typename ..._Fields>
 	struct Object {};
