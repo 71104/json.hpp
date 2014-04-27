@@ -244,6 +244,19 @@ inline std::ostream &operator << (std::ostream &ros, JSON::Object<_Fields...> &r
 	return JSON::Store<JSON::Object<_Fields...>>(ros, rObject);
 }
 
-#define UNPACK(sz) (sz)[0], ((sz)[0] > 0) ? UNPACK((sz) + 1) : 0
+static char UNPACK(char const sz[]) {
+	return 0;
+}
+
+static char (*JSON_ALMOST_UNPACK())(char const[]) {
+	return UNPACK;
+}
+
+#define JSON_EMPTY(...)
+#define JSON_DEFER(...) __VA_ARGS__ JSON_EMPTY()
+#define JSON_EXPAND(...) __VA_ARGS__
+
+#define JSON_ALMOST_UNPACK() UNPACK
+#define UNPACK(sz) (sz)[0], ((sz)[0] > 0) ? JSON_DEFER(JSON_ALMOST_UNPACK)()((sz) + 1) : 0
 
 #endif
