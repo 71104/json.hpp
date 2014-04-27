@@ -23,7 +23,7 @@ int main() {
 
 	JSON::Object<JSON::Field<bool, 'f'>>().Get<'f'>();
 
-	JSON::FieldName<JSON_EXPAND(JSON_EXPAND(UNPACK("")))>();
+	JSON::Field<bool, UNPACK("hello")>();
 
 	return 0;
 }

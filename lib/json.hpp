@@ -18,12 +18,12 @@ namespace JSON {
 
 	template<typename _Value, char const ..._szName>
 	struct Field {
-		static char const s_szName;
+		static char const s_szName[];
 		typedef _Value Type;
 	};
 
 	template<typename _Value, char const ..._szName>
-	char const Field<_Value, _szName...>::s_szName = { _szName... };
+	char const Field<_Value, _szName...>::s_szName[] = { _szName... };
 
 	template<char const ..._sz>
 	struct FieldName {};
@@ -244,19 +244,109 @@ inline std::ostream &operator << (std::ostream &ros, JSON::Object<_Fields...> &r
 	return JSON::Store<JSON::Object<_Fields...>>(ros, rObject);
 }
 
-static char UNPACK(char const sz[]) {
-	return 0;
-}
+#define JSON_CHAR_AT(sz, i) ((i < sizeof(sz)) ? (sz)[i] : 0)
+#define JSON_UNPACK(sz) \
+	JSON_CHAR_AT((sz), 0), \
+	JSON_CHAR_AT((sz), 1), \
+	JSON_CHAR_AT((sz), 2), \
+	JSON_CHAR_AT((sz), 3), \
+	JSON_CHAR_AT((sz), 4), \
+	JSON_CHAR_AT((sz), 5), \
+	JSON_CHAR_AT((sz), 6), \
+	JSON_CHAR_AT((sz), 7), \
+	JSON_CHAR_AT((sz), 8), \
+	JSON_CHAR_AT((sz), 9), \
+	JSON_CHAR_AT((sz), 10), \
+	JSON_CHAR_AT((sz), 11), \
+	JSON_CHAR_AT((sz), 12), \
+	JSON_CHAR_AT((sz), 13), \
+	JSON_CHAR_AT((sz), 14), \
+	JSON_CHAR_AT((sz), 15), \
+	JSON_CHAR_AT((sz), 16), \
+	JSON_CHAR_AT((sz), 17), \
+	JSON_CHAR_AT((sz), 18), \
+	JSON_CHAR_AT((sz), 19), \
+	JSON_CHAR_AT((sz), 20), \
+	JSON_CHAR_AT((sz), 21), \
+	JSON_CHAR_AT((sz), 22), \
+	JSON_CHAR_AT((sz), 23), \
+	JSON_CHAR_AT((sz), 24), \
+	JSON_CHAR_AT((sz), 25), \
+	JSON_CHAR_AT((sz), 26), \
+	JSON_CHAR_AT((sz), 27), \
+	JSON_CHAR_AT((sz), 28), \
+	JSON_CHAR_AT((sz), 29), \
+	JSON_CHAR_AT((sz), 30), \
+	JSON_CHAR_AT((sz), 31), \
+	JSON_CHAR_AT((sz), 32), \
+	JSON_CHAR_AT((sz), 33), \
+	JSON_CHAR_AT((sz), 34), \
+	JSON_CHAR_AT((sz), 35), \
+	JSON_CHAR_AT((sz), 36), \
+	JSON_CHAR_AT((sz), 37), \
+	JSON_CHAR_AT((sz), 38), \
+	JSON_CHAR_AT((sz), 39), \
+	JSON_CHAR_AT((sz), 40), \
+	JSON_CHAR_AT((sz), 41), \
+	JSON_CHAR_AT((sz), 42), \
+	JSON_CHAR_AT((sz), 43), \
+	JSON_CHAR_AT((sz), 44), \
+	JSON_CHAR_AT((sz), 45), \
+	JSON_CHAR_AT((sz), 46), \
+	JSON_CHAR_AT((sz), 47), \
+	JSON_CHAR_AT((sz), 48), \
+	JSON_CHAR_AT((sz), 49), \
+	JSON_CHAR_AT((sz), 50), \
+	JSON_CHAR_AT((sz), 51), \
+	JSON_CHAR_AT((sz), 52), \
+	JSON_CHAR_AT((sz), 53), \
+	JSON_CHAR_AT((sz), 54), \
+	JSON_CHAR_AT((sz), 55), \
+	JSON_CHAR_AT((sz), 56), \
+	JSON_CHAR_AT((sz), 57), \
+	JSON_CHAR_AT((sz), 58), \
+	JSON_CHAR_AT((sz), 59), \
+	JSON_CHAR_AT((sz), 60), \
+	JSON_CHAR_AT((sz), 61), \
+	JSON_CHAR_AT((sz), 62), \
+	JSON_CHAR_AT((sz), 63), \
+	JSON_CHAR_AT((sz), 64), \
+	JSON_CHAR_AT((sz), 65), \
+	JSON_CHAR_AT((sz), 66), \
+	JSON_CHAR_AT((sz), 67), \
+	JSON_CHAR_AT((sz), 68), \
+	JSON_CHAR_AT((sz), 69), \
+	JSON_CHAR_AT((sz), 70), \
+	JSON_CHAR_AT((sz), 71), \
+	JSON_CHAR_AT((sz), 72), \
+	JSON_CHAR_AT((sz), 73), \
+	JSON_CHAR_AT((sz), 74), \
+	JSON_CHAR_AT((sz), 75), \
+	JSON_CHAR_AT((sz), 76), \
+	JSON_CHAR_AT((sz), 77), \
+	JSON_CHAR_AT((sz), 78), \
+	JSON_CHAR_AT((sz), 79), \
+	JSON_CHAR_AT((sz), 80), \
+	JSON_CHAR_AT((sz), 81), \
+	JSON_CHAR_AT((sz), 82), \
+	JSON_CHAR_AT((sz), 83), \
+	JSON_CHAR_AT((sz), 84), \
+	JSON_CHAR_AT((sz), 85), \
+	JSON_CHAR_AT((sz), 86), \
+	JSON_CHAR_AT((sz), 87), \
+	JSON_CHAR_AT((sz), 88), \
+	JSON_CHAR_AT((sz), 89), \
+	JSON_CHAR_AT((sz), 90), \
+	JSON_CHAR_AT((sz), 91), \
+	JSON_CHAR_AT((sz), 92), \
+	JSON_CHAR_AT((sz), 93), \
+	JSON_CHAR_AT((sz), 94), \
+	JSON_CHAR_AT((sz), 95), \
+	JSON_CHAR_AT((sz), 96), \
+	JSON_CHAR_AT((sz), 97), \
+	JSON_CHAR_AT((sz), 98), \
+	JSON_CHAR_AT((sz), 99)
 
-static char (*JSON_ALMOST_UNPACK())(char const[]) {
-	return UNPACK;
-}
-
-#define JSON_EMPTY(...)
-#define JSON_DEFER(...) __VA_ARGS__ JSON_EMPTY()
-#define JSON_EXPAND(...) __VA_ARGS__
-
-#define JSON_ALMOST_UNPACK() UNPACK
-#define UNPACK(sz) (sz)[0], ((sz)[0] > 0) ? JSON_DEFER(JSON_ALMOST_UNPACK)()((sz) + 1) : 0
+#define UNPACK JSON_UNPACK
 
 #endif
