@@ -25,8 +25,22 @@ namespace JSON {
 	template<typename _Value, char const ..._szName>
 	char const Field<_Value, _szName...>::s_szName[] = { _szName... };
 
+	template<typename _Value, char const ..._szName>
+	struct OptionalField {
+		static char const s_szName[];
+		typedef _Value Type;
+	};
+
+	template<typename _Value, char const ..._szName>
+	char const OptionalField<_Value, _szName...>::s_szName[] = { _szName... };
+
 	template<char const ..._sz>
-	struct FieldName {};
+	struct FieldName {
+		static char const s_szName[];
+	};
+
+	template<char const ..._sz>
+	char const FieldName<_sz...>::s_szName[] = { _sz... };
 
 	template<typename _Name, typename ..._Fields>
 	struct FieldType {};
@@ -115,6 +129,26 @@ namespace JSON {
 
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
 	char const Object<Field<_Value, _szName...>, _OtherFields...>::s_szName[] = { _szName... };
+
+	template<typename _Value, char const ..._szName, typename ..._OtherFields>
+	struct Object<OptionalField<_Value, _szName...>, _OtherFields...> :
+		public Object<_OtherFields...>
+	{
+		static char const s_szName[];
+		_Value m_Value;
+		bool m_fPresent;
+
+		Object()
+			:
+		m_fPresent(false) {}
+
+		virtual ~Object() {}
+
+		// TODO getters
+	};
+
+	template<typename _Value, char const ..._szName, typename ..._OtherFields>
+	char const Object<OptionalField<_Value, _szName...>, _OtherFields...>::s_szName[] = { _szName... };
 
 	template<typename _Type>
 	struct Serializer {
