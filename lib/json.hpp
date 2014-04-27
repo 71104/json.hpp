@@ -2,8 +2,10 @@
 #define __JSON_HPP__
 
 #include <cctype>
-#include <iostream>
 #include <string>
+#include <iostream>
+#include <iterator>
+#include <sstream>
 #include <vector>
 #include <array>
 #include <regex>
@@ -152,89 +154,104 @@ namespace JSON {
 
 	template<typename _Type>
 	struct Serializer {
-		static _Type Load(istream &ris);
-		static ostream &Store(ostream &ros, _Type const &r);
+		template<typename _Iterator>
+		static _Type Load(_Iterator i, _Iterator j);
+
+		static string Store(_Type const &r);
 	};
 
 	template<>
 	struct Serializer<nullptr_t> {
-		static nullptr_t Load(istream &ris) {
+		template<typename _Iterator>
+		static nullptr_t Load(_Iterator i, _Iterator j) {
 			// TODO
 			throw Error();
 		}
 
-		static ostream &Store(ostream &ros, nullptr_t const &r) {
-			return ros << "null";
+		static string Store(nullptr_t const &r) {
+			return "null";
 		}
 	};
 
 	template<>
 	struct Serializer<bool> {
-		static bool Load(istream &ris) {
+		template<typename _Iterator>
+		static bool Load(_Iterator i, _Iterator j) {
 			// TODO
 			throw Error();
 		}
 
-		static ostream &Store(ostream &ros, bool const &r) {
+		static string Store(bool const &r) {
 			if (r) {
-				return ros << "true";
+				return "true";
 			} else {
-				return ros << "false";
+				return "false";
 			}
 		}
 	};
 
 	template<>
 	struct Serializer<int> {
-		static int Load(istream &ris) {
+		template<typename _Iterator>
+		static int Load(_Iterator i, _Iterator j) {
 			// TODO
 			throw Error();
 		}
 
-		static ostream &Store(ostream &ros, int const &r) {
-			return ros << r;
+		static string Store(int const &r) {
+			ostringstream oss;
+			oss << r;
+			return oss.str();
 		}
 	};
 
 	template<>
 	struct Serializer<unsigned int> {
-		static unsigned int Load(istream &ris) {
+		template<typename _Iterator>
+		static unsigned int Load(_Iterator i, _Iterator j) {
 			// TODO
 			throw Error();
 		}
 
-		static ostream &Store(ostream &ros, unsigned int const &r) {
-			return ros << r;
+		static string Store(unsigned int const &r) {
+			ostringstream oss;
+			oss << r;
+			return oss.str();
 		}
 	};
 
 	template<>
 	struct Serializer<double> {
-		static double Load(istream &ris) {
+		template<typename _Iterator>
+		static double Load(_Iterator i, _Iterator j) {
 			// TODO
 			throw Error();
 		}
 
-		static ostream &Store(ostream &ros, double const &r) {
-			return ros << r;
+		static string Store(double const &r) {
+			ostringstream oss;
+			oss << r;
+			return oss.str();
 		}
 	};
 
 	template<>
 	struct Serializer<string> {
-		static string Load(istream &ris) {
+		template<typename _Iterator>
+		static string Load(_Iterator i, _Iterator j) {
 			// TODO
 			throw Error();
 		}
 
-		static ostream &Store(ostream &ros, string const &r) {
-			return ros << '\"' << r << '\"'; // FIXME escape special characters
+		static string Store(ostream &ros, string const &r) {
+			return "\"" + r + "\""; // FIXME escape special characters
 		}
 	};
 
 	template<typename ..._Fields>
 	struct Serializer<Object<_Fields...>> {
-		static Object<_Fields...> Load(istream &ris) {
+		template<typename _Iterator>
+		static Object<_Fields...> Load(_Iterator i, _Iterator j) {
 			// TODO
 			throw Error();
 		}
@@ -242,7 +259,8 @@ namespace JSON {
 
 	template<typename _Element>
 	struct Serializer<vector<_Element>> {
-		static vector<_Element> Load(istream &ris) {
+		template<typename _Iterator>
+		static vector<_Element> Load(_Iterator i, _Iterator j) {
 			// TODO
 			throw Error();
 		}
@@ -250,20 +268,31 @@ namespace JSON {
 
 	template<typename _Element, unsigned int _c>
 	struct Serializer<array<_Element, _c>> {
-		static array<_Element, _c> Load(istream &ris) {
+		template<typename _Iterator>
+		static array<_Element, _c> Load(_Iterator i, _Iterator j) {
 			// TODO
 			throw Error();
 		}
 	};
 
 	template<typename _Type>
+	inline _Type Load(string const &rstr) {
+		return Serializer<_Type>::Load(rstr.begin(), rstr.end());
+	}
+
+	template<typename _Type>
 	inline _Type Load(istream &ris) {
-		return Serializer<_Type>::Load(ris);
+		return Serializer<_Type>::Load(istreambuf_iterator<char>(ris), istreambuf_iterator<char>());
+	}
+
+	template<typename _Type>
+	inline string Store(_Type const &r) {
+		return Serializer<_Type>::Store(r);
 	}
 
 	template<typename _Type>
 	inline ostream &Store(ostream &ros, _Type const &r) {
-		return Serializer<_Type>::Store(ros, r);
+		return ros << Serializer<_Type>::Store(r);
 	}
 }
 

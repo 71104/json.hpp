@@ -25,5 +25,7 @@ int main() {
 
 	cout << JSON::Field<bool, UNPACK("hello")>::s_szName << endl;
 
+	JSON::Load<nullptr_t>(cin);
+
 	return 0;
 }
