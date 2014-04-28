@@ -155,7 +155,7 @@ namespace JSON {
 	template<typename _Type>
 	struct Serializer {
 		template<typename _Iterator>
-		static _Type Load(_Iterator i, _Iterator j);
+		static _Type Load(_Iterator &ri, _Iterator j);
 
 		static string Store(_Type const &r);
 	};
@@ -163,9 +163,12 @@ namespace JSON {
 	template<>
 	struct Serializer<nullptr_t> {
 		template<typename _Iterator>
-		static nullptr_t Load(_Iterator i, _Iterator j) {
-			// TODO
-			throw Error();
+		static nullptr_t Load(_Iterator &ri, _Iterator j) {
+			if (regex_search(ri, j, regex("^\\s*null"))) {
+				return nullptr;
+			} else {
+				throw SyntaxError();
+			}
 		}
 
 		static string Store(nullptr_t const &r) {
@@ -176,7 +179,7 @@ namespace JSON {
 	template<>
 	struct Serializer<bool> {
 		template<typename _Iterator>
-		static bool Load(_Iterator i, _Iterator j) {
+		static bool Load(_Iterator &ri, _Iterator j) {
 			// TODO
 			throw Error();
 		}
@@ -193,7 +196,7 @@ namespace JSON {
 	template<>
 	struct Serializer<int> {
 		template<typename _Iterator>
-		static int Load(_Iterator i, _Iterator j) {
+		static int Load(_Iterator &ri, _Iterator j) {
 			// TODO
 			throw Error();
 		}
@@ -208,7 +211,7 @@ namespace JSON {
 	template<>
 	struct Serializer<unsigned int> {
 		template<typename _Iterator>
-		static unsigned int Load(_Iterator i, _Iterator j) {
+		static unsigned int Load(_Iterator &ri, _Iterator j) {
 			// TODO
 			throw Error();
 		}
@@ -223,7 +226,7 @@ namespace JSON {
 	template<>
 	struct Serializer<double> {
 		template<typename _Iterator>
-		static double Load(_Iterator i, _Iterator j) {
+		static double Load(_Iterator &ri, _Iterator j) {
 			// TODO
 			throw Error();
 		}
@@ -238,7 +241,7 @@ namespace JSON {
 	template<>
 	struct Serializer<string> {
 		template<typename _Iterator>
-		static string Load(_Iterator i, _Iterator j) {
+		static string Load(_Iterator &ri, _Iterator j) {
 			// TODO
 			throw Error();
 		}
@@ -251,7 +254,7 @@ namespace JSON {
 	template<typename ..._Fields>
 	struct Serializer<Object<_Fields...>> {
 		template<typename _Iterator>
-		static Object<_Fields...> Load(_Iterator i, _Iterator j) {
+		static Object<_Fields...> Load(_Iterator &ri, _Iterator j) {
 			// TODO
 			throw Error();
 		}
@@ -260,7 +263,7 @@ namespace JSON {
 	template<typename _Element>
 	struct Serializer<vector<_Element>> {
 		template<typename _Iterator>
-		static vector<_Element> Load(_Iterator i, _Iterator j) {
+		static vector<_Element> Load(_Iterator &ri, _Iterator j) {
 			// TODO
 			throw Error();
 		}
@@ -269,7 +272,7 @@ namespace JSON {
 	template<typename _Element, unsigned int _c>
 	struct Serializer<array<_Element, _c>> {
 		template<typename _Iterator>
-		static array<_Element, _c> Load(_Iterator i, _Iterator j) {
+		static array<_Element, _c> Load(_Iterator &ri, _Iterator j) {
 			// TODO
 			throw Error();
 		}
@@ -282,7 +285,9 @@ namespace JSON {
 
 	template<typename _Type>
 	inline _Type Load(istream &ris) {
-		return Serializer<_Type>::Load(istreambuf_iterator<char>(ris), istreambuf_iterator<char>());
+		string const str = string(istreambuf_iterator<char>(ris), istreambuf_iterator<char>());
+		auto it = str.begin();
+		return Serializer<_Type>::Load(it, str.end());
 	}
 
 	template<typename _Type>
