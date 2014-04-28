@@ -12,8 +12,8 @@ int main() {
 			JSON::Field<bool, UNPACK("flag")>
 		>, UNPACK("object")>,
 		JSON::Field<vector<vector<JSON::Object<
-			JSON::Field<double, 'x'>,
-			JSON::Field<double, 'y'>
+			JSON::Field<double, UNPACK("x")>,
+			JSON::Field<double, UNPACK("y")>
 		>>>, UNPACK("matrix")>
 	> o;
 
