@@ -8,6 +8,7 @@
 #include <sstream>
 #include <vector>
 #include <array>
+#include <map>
 #include <regex>
 
 namespace JSON {
@@ -175,6 +176,21 @@ namespace JSON {
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
 	char const Object<OptionalField<_Value, _szName...>, _OtherFields...>::s_szName[] = { _szName... };
 
+	struct Any {
+		enum Type {
+			TYPE_NULL,
+			TYPE_BOOL,
+			TYPE_INT,
+			TYPE_UINT,
+			TYPE_DOUBLE,
+			TYPE_STRING,
+			TYPE_OBJECT,
+			TYPE_VECTOR,
+			TYPE_ARRAY,
+			TYPE_MAP
+		} m_Type;
+	};
+
 	template<typename _Type>
 	struct Serializer {
 		template<typename _Iterator>
@@ -269,7 +285,7 @@ namespace JSON {
 			throw Error();
 		}
 
-		static string Store(ostream &ros, string const &r) {
+		static string Store(string const &r) {
 			return "\"" + r + "\""; // FIXME escape special characters
 		}
 	};
@@ -290,15 +306,53 @@ namespace JSON {
 			// TODO
 			throw Error();
 		}
+
+		static string Store(vector<_Element> const &r) {
+			string str = "[";
+			auto it = r.begin();
+			if (it != r.end()) {
+				str += Serializer<_Element>::Store(*it);
+				while (++it != r.end()) {
+					str += "," + Serializer<_Element>::Store(*it);
+				}
+			}
+			return str += "]";
+		}
 	};
 
-	template<typename _Element, unsigned int _c>
+	template<typename _Element, unsigned int const _c>
 	struct Serializer<array<_Element, _c>> {
 		template<typename _Iterator>
 		static array<_Element, _c> Load(_Iterator &ri, _Iterator j) {
 			// TODO
 			throw Error();
 		}
+	};
+
+	template<typename _Element>
+	struct Serializer<map<string, _Element>> {
+		template<typename _Iterator>
+		static map<string, _Element> Load(_Iterator &ri, _Iterator j) {
+			// TODO
+			throw Error();
+		}
+
+		static string Store(map<string, _Element> const &r) {
+			string str = "{";
+			auto it = r.begin();
+			if (it != r.end()) {
+				str += "\"" + it->first + "\":" + Serializer<_Element>::Store(it->second); // FIXME escape special characters
+				while (++it != r.end()) {
+					str += ",\"" + it->first + "\":" + Serializer<_Element>::Store(it->second); // FIXME escape special characters
+				}
+			}
+			return str += "}";
+		}
+	};
+
+	template<>
+	struct Serializer<Any> {
+		// TODO
 	};
 
 	template<typename _Type>
