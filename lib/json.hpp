@@ -312,30 +312,109 @@ inline std::ostream &operator << (std::ostream &ros, JSON::Object<_Fields...> &r
 	return JSON::Store<JSON::Object<_Fields...>>(ros, rObject);
 }
 
-static constexpr char JSON_UNPACK(char const sz[], unsigned int i) {
-	return (void)sz, (void)i, 0;
-}
+#define JSON_CHAR(sz, i) ((i) < sizeof(sz)) ? (sz)[i] : 0
+#define JSON_UNPACK(sz) \
+	JSON_CHAR((sz), 0), \
+	JSON_CHAR((sz), 1), \
+	JSON_CHAR((sz), 2), \
+	JSON_CHAR((sz), 3), \
+	JSON_CHAR((sz), 4), \
+	JSON_CHAR((sz), 5), \
+	JSON_CHAR((sz), 6), \
+	JSON_CHAR((sz), 7), \
+	JSON_CHAR((sz), 8), \
+	JSON_CHAR((sz), 9), \
+	JSON_CHAR((sz), 10), \
+	JSON_CHAR((sz), 11), \
+	JSON_CHAR((sz), 12), \
+	JSON_CHAR((sz), 13), \
+	JSON_CHAR((sz), 14), \
+	JSON_CHAR((sz), 15), \
+	JSON_CHAR((sz), 16), \
+	JSON_CHAR((sz), 17), \
+	JSON_CHAR((sz), 18), \
+	JSON_CHAR((sz), 19), \
+	JSON_CHAR((sz), 20), \
+	JSON_CHAR((sz), 21), \
+	JSON_CHAR((sz), 22), \
+	JSON_CHAR((sz), 23), \
+	JSON_CHAR((sz), 24), \
+	JSON_CHAR((sz), 25), \
+	JSON_CHAR((sz), 26), \
+	JSON_CHAR((sz), 27), \
+	JSON_CHAR((sz), 28), \
+	JSON_CHAR((sz), 29), \
+	JSON_CHAR((sz), 30), \
+	JSON_CHAR((sz), 31), \
+	JSON_CHAR((sz), 32), \
+	JSON_CHAR((sz), 33), \
+	JSON_CHAR((sz), 34), \
+	JSON_CHAR((sz), 35), \
+	JSON_CHAR((sz), 36), \
+	JSON_CHAR((sz), 37), \
+	JSON_CHAR((sz), 38), \
+	JSON_CHAR((sz), 39), \
+	JSON_CHAR((sz), 40), \
+	JSON_CHAR((sz), 41), \
+	JSON_CHAR((sz), 42), \
+	JSON_CHAR((sz), 43), \
+	JSON_CHAR((sz), 44), \
+	JSON_CHAR((sz), 45), \
+	JSON_CHAR((sz), 46), \
+	JSON_CHAR((sz), 47), \
+	JSON_CHAR((sz), 48), \
+	JSON_CHAR((sz), 49), \
+	JSON_CHAR((sz), 50), \
+	JSON_CHAR((sz), 51), \
+	JSON_CHAR((sz), 52), \
+	JSON_CHAR((sz), 53), \
+	JSON_CHAR((sz), 54), \
+	JSON_CHAR((sz), 55), \
+	JSON_CHAR((sz), 56), \
+	JSON_CHAR((sz), 57), \
+	JSON_CHAR((sz), 58), \
+	JSON_CHAR((sz), 59), \
+	JSON_CHAR((sz), 60), \
+	JSON_CHAR((sz), 61), \
+	JSON_CHAR((sz), 62), \
+	JSON_CHAR((sz), 63), \
+	JSON_CHAR((sz), 64), \
+	JSON_CHAR((sz), 65), \
+	JSON_CHAR((sz), 66), \
+	JSON_CHAR((sz), 67), \
+	JSON_CHAR((sz), 68), \
+	JSON_CHAR((sz), 69), \
+	JSON_CHAR((sz), 70), \
+	JSON_CHAR((sz), 71), \
+	JSON_CHAR((sz), 72), \
+	JSON_CHAR((sz), 73), \
+	JSON_CHAR((sz), 74), \
+	JSON_CHAR((sz), 75), \
+	JSON_CHAR((sz), 76), \
+	JSON_CHAR((sz), 77), \
+	JSON_CHAR((sz), 78), \
+	JSON_CHAR((sz), 79), \
+	JSON_CHAR((sz), 80), \
+	JSON_CHAR((sz), 81), \
+	JSON_CHAR((sz), 82), \
+	JSON_CHAR((sz), 83), \
+	JSON_CHAR((sz), 84), \
+	JSON_CHAR((sz), 85), \
+	JSON_CHAR((sz), 86), \
+	JSON_CHAR((sz), 87), \
+	JSON_CHAR((sz), 88), \
+	JSON_CHAR((sz), 89), \
+	JSON_CHAR((sz), 90), \
+	JSON_CHAR((sz), 91), \
+	JSON_CHAR((sz), 92), \
+	JSON_CHAR((sz), 93), \
+	JSON_CHAR((sz), 94), \
+	JSON_CHAR((sz), 95), \
+	JSON_CHAR((sz), 96), \
+	JSON_CHAR((sz), 97), \
+	JSON_CHAR((sz), 98), \
+	JSON_CHAR((sz), 99)
 
-static constexpr char (*JSON_ALMOST_UNPACK())(char const[], unsigned int) {
-	return JSON_UNPACK;
-}
-
-#define JSON_EMPTY(...)
-#define JSON_DEFER(...) __VA_ARGS__ JSON_EMPTY()
-#define JSON_EXPAND(...) __VA_ARGS__
-
-#define JSON_EXPAND0 JSON_EXPAND
-#define JSON_EXPAND1(...) JSON_EXPAND0(JSON_EXPAND0(__VA_ARGS__))
-#define JSON_EXPAND2(...) JSON_EXPAND1(JSON_EXPAND1(__VA_ARGS__))
-#define JSON_EXPAND3(...) JSON_EXPAND2(JSON_EXPAND2(__VA_ARGS__))
-#define JSON_EXPAND4(...) JSON_EXPAND3(JSON_EXPAND3(__VA_ARGS__))
-#define JSON_EXPAND5(...) JSON_EXPAND4(JSON_EXPAND4(__VA_ARGS__))
-#define JSON_EXPAND6(...) JSON_EXPAND5(JSON_EXPAND5(__VA_ARGS__))
-#define JSON_EXPAND_ALL JSON_EXPAND6
-
-#define JSON_ALMOST_UNPACK() JSON_UNPACK
-#define JSON_UNPACK(sz, i) ((i) < sizeof(sz)) ? (sz)[i] : 0, JSON_DEFER(JSON_ALMOST_UNPACK)()(sz, i + 1)
-
-#define UNPACK(sz) JSON_EXPAND_ALL(JSON_UNPACK(sz, 0))
+#define UNPACK JSON_UNPACK
 
 #endif
