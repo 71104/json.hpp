@@ -8,6 +8,7 @@ int main() {
 		JSON::Field<int, UNPACK("integer")>,
 		JSON::Field<double, UNPACK("floating point")>,
 		JSON::Field<string, UNPACK("string")>,
+		JSON::OptionalField<vector<bool>, UNPACK("optional field")>,
 		JSON::Field<JSON::Object<
 			JSON::Field<bool, UNPACK("flag")>
 		>, UNPACK("object")>,
@@ -20,6 +21,8 @@ int main() {
 	o.Get<UNPACK("integer")>();
 	o.Get<UNPACK("matrix")>();
 	o.Get<UNPACK("object")>().Get<UNPACK("flag")>();
+
+	o.Has<UNPACK("optional field")>();
 
 	JSON::Object<JSON::Field<bool, UNPACK("boolean")>>().Get<UNPACK("boolean")>();
 

@@ -52,6 +52,11 @@ namespace JSON {
 		typedef _Value Type;
 	};
 
+	template<typename _Value, char const ..._szName, typename ..._OtherFields>
+	struct FieldType<FieldName<_szName...>, OptionalField<_Value, _szName...>, _OtherFields...> {
+		typedef _Value Type;
+	};
+
 	template<char const ..._szFieldName, typename _FirstField, typename ..._OtherFields>
 	struct FieldType<FieldName<_szFieldName...>, _FirstField, _OtherFields...> {
 		typedef typename FieldType<FieldName<_szFieldName...>, _OtherFields...>::Type Type;
@@ -82,6 +87,36 @@ namespace JSON {
 
 		inline static _Value const &Get(Object<_FirstField, _OtherFields...> const &rObject) {
 			return Getter<Field<_Value, _szName...>, _FirstField, _OtherFields...>::Get(rObject);
+		}
+	};
+
+	template<typename _Value, char const ..._szName, typename ..._OtherFields>
+	struct Getter<OptionalField<_Value, _szName...>, OptionalField<_Value, _szName...>, _OtherFields...> {
+		inline static bool Has(Object<OptionalField<_Value, _szName...>, _OtherFields...> const &rObject) {
+			return rObject.m_fPresent;
+		}
+
+		inline static _Value &Get(Object<OptionalField<_Value, _szName...>, _OtherFields...> &rObject) {
+			return rObject.m_Value;
+		}
+
+		inline static _Value const &Get(Object<OptionalField<_Value, _szName...>, _OtherFields...> const &rObject) {
+			return rObject.m_Value;
+		}
+	};
+
+	template<typename _Value, char const ..._szName, typename _FirstField, typename ..._OtherFields>
+	struct Getter<OptionalField<_Value, _szName...>, _FirstField, _OtherFields...> {
+		inline static bool Has(Object<_FirstField, _OtherFields...> const &rObject) {
+			return Getter<OptionalField<_Value, _szName...>, _FirstField, _OtherFields...>::Has(rObject);
+		}
+
+		inline static _Value &Get(Object<_FirstField, _OtherFields...> &rObject) {
+			return Getter<OptionalField<_Value, _szName...>, _OtherFields...>::Get(rObject);
+		}
+
+		inline static _Value const &Get(Object<_FirstField, _OtherFields...> const &rObject) {
+			return Getter<OptionalField<_Value, _szName...>, _FirstField, _OtherFields...>::Get(rObject);
 		}
 	};
 
@@ -146,7 +181,44 @@ namespace JSON {
 
 		virtual ~Object() {}
 
-		// TODO getters
+		template<char const ..._szFieldName>
+		inline bool Has() {
+			return Getter<
+				OptionalField<typename FieldType<
+					FieldName<_szFieldName...>,
+					OptionalField<_Value, _szName...>,
+					_OtherFields...
+				>::Type, _szFieldName...>,
+				OptionalField<_Value, _szName...>,
+				_OtherFields...
+			>::Has(*this);
+		}
+
+		template<char const ..._szFieldName>
+		inline typename FieldType<FieldName<_szFieldName...>, OptionalField<_Value, _szName...>, _OtherFields...>::Type &Get() {
+			return Getter<
+				OptionalField<typename FieldType<
+					FieldName<_szFieldName...>,
+					OptionalField<_Value, _szName...>,
+					_OtherFields...
+				>::Type, _szFieldName...>,
+				OptionalField<_Value, _szName...>,
+				_OtherFields...
+			>::Get(*this);
+		}
+
+		template<char const ..._szFieldName>
+		inline typename FieldType<FieldName<_szFieldName...>, OptionalField<_Value, _szName...>, _OtherFields...>::Type const &Get() const {
+			return Getter<
+				OptionalField<typename FieldType<
+					FieldName<_szFieldName...>,
+					OptionalField<_Value, _szName...>,
+					_OtherFields...
+				>::Type, _szFieldName...>,
+				OptionalField<_Value, _szName...>,
+				_OtherFields...
+			>::Get(*this);
+		}
 	};
 
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
@@ -308,7 +380,7 @@ inline std::istream &operator >> (std::istream &ris, JSON::Object<_Fields...> &r
 }
 
 template<typename ..._Fields>
-inline std::ostream &operator << (std::ostream &ros, JSON::Object<_Fields...> &rObject) {
+inline std::ostream &operator << (std::ostream &ros, JSON::Object<_Fields...> const &rObject) {
 	return JSON::Store<JSON::Object<_Fields...>>(ros, rObject);
 }
 
