@@ -2,19 +2,20 @@
 #include <json.hpp>
 
 using namespace std;
+using namespace JSON;
 
 int main() {
-	JSON::Object<
-		JSON::Field<int, UNPACK("integer")>,
-		JSON::Field<double, UNPACK("floating point")>,
-		JSON::Field<string, UNPACK("string")>,
-		JSON::OptionalField<vector<bool>, UNPACK("optional field")>,
-		JSON::Field<JSON::Object<
-			JSON::Field<bool, UNPACK("flag")>
+	Object<
+		Field<int, UNPACK("integer")>,
+		Field<double, UNPACK("floating point")>,
+		Field<string, UNPACK("string")>,
+		OptionalField<vector<bool>, UNPACK("optional field")>,
+		Field<Object<
+			Field<bool, UNPACK("flag")>
 		>, UNPACK("object")>,
-		JSON::Field<vector<vector<JSON::Object<
-			JSON::Field<double, UNPACK("x")>,
-			JSON::Field<double, UNPACK("y")>
+		Field<vector<vector<Object<
+			Field<double, UNPACK("x")>,
+			Field<double, UNPACK("y")>
 		>>>, UNPACK("matrix")>
 	> o;
 
@@ -26,11 +27,11 @@ int main() {
 		o.Get<UNPACK("optional field")>();
 	}
 
-	JSON::Object<JSON::Field<bool, UNPACK("boolean")>>().Get<UNPACK("boolean")>();
+	Object<Field<bool, UNPACK("boolean")>>().Get<UNPACK("boolean")>();
 
-	cout << JSON::Field<int, UNPACK("Hello, world!")>::s_szName << endl;
+	cout << Field<int, UNPACK("Hello, world!")>::s_szName << endl;
 
-	JSON::Load<nullptr_t>(cin);
+	Load<nullptr_t>(cin);
 
 	return 0;
 }
