@@ -22,7 +22,9 @@ int main() {
 	o.Get<UNPACK("matrix")>();
 	o.Get<UNPACK("object")>().Get<UNPACK("flag")>();
 
-	o.Has<UNPACK("optional field")>();
+	if (o.Has<UNPACK("optional field")>()) {
+		o.Get<UNPACK("optional field")>();
+	}
 
 	JSON::Object<JSON::Field<bool, UNPACK("boolean")>>().Get<UNPACK("boolean")>();
 
