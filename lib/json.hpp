@@ -23,6 +23,7 @@ namespace JSON {
 	struct Field {
 		static char const s_szName[];
 		typedef _Value Type;
+		Type m_Value;
 	};
 
 	template<typename _Value, char const ..._szName>
@@ -32,6 +33,13 @@ namespace JSON {
 	struct OptionalField {
 		static char const s_szName[];
 		typedef _Value Type;
+
+		Type m_Value;
+		bool m_fPresent;
+
+		OptionalField()
+			:
+		m_fPresent(false) {}
 	};
 
 	template<typename _Value, char const ..._szName>
@@ -74,11 +82,11 @@ namespace JSON {
 		typedef _Value Type;
 
 		inline static Type &Get(Object<Field<_Value, _szName...>, _OtherFields...> &rObject) {
-			return rObject.m_Value;
+			return rObject.m_Field.m_Value;
 		}
 
 		inline static Type const &Get(Object<Field<_Value, _szName...>, _OtherFields...> const &rObject) {
-			return rObject.m_Value;
+			return rObject.m_Field.m_Value;
 		}
 	};
 
@@ -87,15 +95,15 @@ namespace JSON {
 		typedef _Value Type;
 
 		inline static bool Has(Object<OptionalField<_Value, _szName...>, _OtherFields...> const &rObject) {
-			return rObject.m_fPresent;
+			return rObject.m_Field.m_fPresent;
 		}
 
 		inline static Type &Get(Object<OptionalField<_Value, _szName...>, _OtherFields...> &rObject) {
-			return rObject.m_Value;
+			return rObject.m_Field.m_Value;
 		}
 
 		inline static Type const &Get(Object<OptionalField<_Value, _szName...>, _OtherFields...> const &rObject) {
-			return rObject.m_Value;
+			return rObject.m_Field.m_Value;
 		}
 	};
 
@@ -122,8 +130,7 @@ namespace JSON {
 	struct Object<Field<_Value, _szName...>, _OtherFields...> :
 		public Object<_OtherFields...>
 	{
-		static char const s_szName[];
-		_Value m_Value;
+		Field<_Value, _szName...> m_Field;
 
 		Object() {}
 
@@ -141,19 +148,10 @@ namespace JSON {
 	};
 
 	template<typename _Value, char const ..._szName, typename ..._OtherFields>
-	char const Object<Field<_Value, _szName...>, _OtherFields...>::s_szName[] = { _szName... };
-
-	template<typename _Value, char const ..._szName, typename ..._OtherFields>
 	struct Object<OptionalField<_Value, _szName...>, _OtherFields...> :
 		public Object<_OtherFields...>
 	{
-		static char const s_szName[];
-		_Value m_Value;
-		bool m_fPresent;
-
-		Object()
-			:
-		m_fPresent(false) {}
+		OptionalField<_Value, _szName...> m_Field;
 
 		virtual ~Object() {}
 
@@ -173,9 +171,6 @@ namespace JSON {
 		}
 	};
 
-	template<typename _Value, char const ..._szName, typename ..._OtherFields>
-	char const Object<OptionalField<_Value, _szName...>, _OtherFields...>::s_szName[] = { _szName... };
-
 	struct Any {
 		enum Type {
 			TYPE_NULL,
@@ -191,13 +186,8 @@ namespace JSON {
 		} m_Type;
 	};
 
-	template<typename _Type>
-	struct Serializer {
-		template<typename _Iterator>
-		static _Type Load(_Iterator &ri, _Iterator j);
-
-		static string Store(_Type const &r);
-	};
+	template<typename ..._Type>
+	struct Serializer {};
 
 	template<>
 	struct Serializer<nullptr_t> {
@@ -291,11 +281,63 @@ namespace JSON {
 	};
 
 	template<typename ..._Fields>
+	struct FieldSerializer {
+		static inline string Store(Object<_Fields...> const &r);
+	};
+
+	template<>
+	struct FieldSerializer<> {
+		static inline string Store(Object<> const &r) {
+			return "";
+		}
+	};
+
+	template<typename _Value, char const ..._szName>
+	struct FieldSerializer<Field<_Value, _szName...>> {
+		static inline string Store(Object<Field<_Value, _szName...>> const &r) {
+			return "\"" + string{ _szName... } + "\":" + Serializer<_Value>::Store(r.m_Field.m_Value);
+		}
+	};
+
+	template<typename _Value, char const ..._szName, typename ..._OtherFields>
+	struct FieldSerializer<Field<_Value, _szName...>, _OtherFields...> {
+		static inline string Store(Object<Field<_Value, _szName...>, _OtherFields...> const &r) {
+			return "\"" + string{ _szName... } + "\":" + Serializer<_Value>::Store(r.m_Field.m_Value) + "," + FieldSerializer<_OtherFields...>::Store(r);
+		}
+	};
+
+	template<typename _Value, char const ..._szName>
+	struct FieldSerializer<OptionalField<_Value, _szName...>> {
+		static inline string Store(Object<OptionalField<_Value, _szName...>> const &r) {
+			if (r.m_Field.m_fPresent) {
+				return "\"" + string{ _szName... } + "\":" + Serializer<_Value>::Store(r.m_Field.m_Value); // FIXME escape special characters
+			} else {
+				return "";
+			}
+		}
+	};
+
+	template<typename _Value, char const ..._szName, typename ..._OtherFields>
+	struct FieldSerializer<OptionalField<_Value, _szName...>, _OtherFields...> {
+		static inline string Store(Object<OptionalField<_Value, _szName...>, _OtherFields...> const &r) {
+			if (r.m_Field.m_fPresent) {
+				return "\"" + string{ _szName... } + "\":" + Serializer<_Value>::Store(r.m_Field.m_Value) + "," + FieldSerializer<_OtherFields...>::Store(r); // FIXME escape special characters
+			} else {
+				return FieldSerializer<_OtherFields...>::Store(r);
+			}
+		}
+	};
+
+	template<typename ..._Fields>
 	struct Serializer<Object<_Fields...>> {
 		template<typename _Iterator>
 		static Object<_Fields...> Load(_Iterator &ri, _Iterator j) {
 			// TODO
 			throw Error();
+		}
+
+		static string Store(Object<_Fields...> const &r) {
+			return "{" + FieldSerializer<_Fields...>::Store(r) + "}";
 		}
 	};
 
@@ -327,6 +369,11 @@ namespace JSON {
 			// TODO
 			throw Error();
 		}
+
+		static string Store(array<_Element, _c> const &r) {
+			// TODO
+			throw Error();
+		}
 	};
 
 	template<typename _Element>
@@ -352,7 +399,16 @@ namespace JSON {
 
 	template<>
 	struct Serializer<Any> {
-		// TODO
+		template<typename _Iterator>
+		static Any Load(_Iterator &ri, _Iterator j) {
+			// TODO
+			throw Error();
+		}
+
+		static string Store(Any const &r) {
+			// TODO
+			throw Error();
+		}
 	};
 
 	template<typename _Type>

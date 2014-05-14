@@ -47,5 +47,8 @@ int main() {
 		o.Get<UNPACK("tiles")>()["0"].Get<UNPACK("frames")>()[0].Get<UNPACK("duration")>();
 	}
 
+	cin >> o;
+	cout << o;
+
 	return 0;
 }
